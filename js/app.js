@@ -21,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   crearDB.onsuccess = function() {
     DB = crearDB.result;
+    mostarCitas();
   };
   // este método sólo corre una vez
   crearDB.onupgradeneeded = function(e) {
@@ -52,8 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
       hora: hora.value,
       sintomas: sintomas.value
     };
-    let transaction = DB.transaction(["citas"], "readwrite");
-    let objectStore = transaction.objectStore("citas");
+    let transaction = DB.transaction(['citas'], 'readwrite');
+    let objectStore = transaction.objectStore('citas');
     let peticion = objectStore.add(nuevaCita);
     peticion.onsuccess = () => {
       form.reset();
@@ -65,5 +66,17 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("HUBO UN ERROR");
     };
     console.log(peticion);
+  }
+  function mostarCitas(){
+    // Eliminamos las citas anteriores
+    while(citas.firstChild){
+      citas.removeChild(citas.firstChild);
+    }
+    let objectStore = DB.transaction('citas').objectStore('citas');
+    objectStore.openCursor().onsuccess = function(e) {
+      let cursor = e.target.result;
+      console.log(cursor);
+      
+    }
   }
 });
