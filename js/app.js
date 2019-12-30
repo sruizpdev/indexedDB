@@ -53,30 +53,55 @@ document.addEventListener("DOMContentLoaded", () => {
       hora: hora.value,
       sintomas: sintomas.value
     };
-    let transaction = DB.transaction(['citas'], 'readwrite');
-    let objectStore = transaction.objectStore('citas');
+    let transaction = DB.transaction(["citas"], "readwrite");
+    let objectStore = transaction.objectStore("citas");
     let peticion = objectStore.add(nuevaCita);
     peticion.onsuccess = () => {
       form.reset();
     };
     transaction.oncomplete = () => {
       console.log("Cita agregada");
+      mostarCitas();
     };
     transaction.onerror = () => {
       console.log("HUBO UN ERROR");
     };
     console.log(peticion);
   }
-  function mostarCitas(){
+  function mostarCitas() {
     // Eliminamos las citas anteriores
-    while(citas.firstChild){
+    while (citas.firstChild) {
       citas.removeChild(citas.firstChild);
     }
-    let objectStore = DB.transaction('citas').objectStore('citas');
+    let objectStore = DB.transaction("citas").objectStore("citas");
+
     objectStore.openCursor().onsuccess = function(e) {
       let cursor = e.target.result;
-      console.log(cursor);
-      
-    }
+      if (cursor) {
+        let citaHTML = document.createElement("li");
+        citaHTML.setAttribute("data-cita-id", cursor.value.key);
+        citaHTML.classList.add("list-group-item");
+        citaHTML.innerHTML = `
+          <p class="font-weight-bold">Mascota: <span class="font-weight-normal">${cursor.value.mascota}</span></p>
+          <p class="font-weight-bold">Cliente: <span class="font-weight-normal">${cursor.value.cliente}</span></p>
+          <p class="font-weight-bold">Teléfono: <span class="font-weight-normal">${cursor.value.telefono}</span></p>
+          <p class="font-weight-bold">Fecha: <span class="font-weight-normal">${cursor.value.fecha}</span></p>
+          <p class="font-weight-bold">Hora: <span class="font-weight-normal">${cursor.value.hora}</span></p>
+          <p class="font-weight-bold">Sintomas: <span class="font-weight-normal">${cursor.value.sintomas}</span></p>
+        `;
+        citas.appendChild(citaHTML);
+        cursor.continue();
+      } else {
+        if(!citas.firstChild){
+          headingAdministra.textContent = 'Agrega citas para comenzar';
+          let listado = document.createElement('p');
+          listado.classList.add('text-center');
+          listado.textContent = 'No hay registros';
+          citas.appendChild(listado);
+        } else {
+          headingAdministra.textContent = 'Administra tus citas';
+        }
+      }
+    };
   }
 });
