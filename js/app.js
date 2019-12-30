@@ -89,6 +89,15 @@ document.addEventListener("DOMContentLoaded", () => {
           <p class="font-weight-bold">Hora: <span class="font-weight-normal">${cursor.value.hora}</span></p>
           <p class="font-weight-bold">Sintomas: <span class="font-weight-normal">${cursor.value.sintomas}</span></p>
         `;
+
+        const botonBorrar = document.createElement('button');
+        botonBorrar.classList.add('borrar', 'btn', 'btn-danger');
+        botonBorrar.innerHTML = '<span aria-hidden=""true>x</span> Borrar';
+        botonBorrar.onclick = borrarCita;
+        citaHTML.appendChild(botonBorrar);
+
+
+
         citas.appendChild(citaHTML);
         cursor.continue();
       } else {
@@ -104,4 +113,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
   }
+
+  function borrarCita(e){
+    let citaID = Number(e.target.parentElement.getAttribute('data-cita-id'));
+    
+    let transaction = DB.transaction(["citas"], "readwrite");
+    let objectStore = transaction.objectStore("citas");
+    let peticion = objectStore.delete(citaID);
+    
+    transaction.oncomplete = () => {
+      e.target.parentElement.parentElement.removeChild(e.target.parentElement);
+      console.log(`Se eliminó la cita con el ID: ${citaID}`);
+      
+    } 
+  }
+
 });
